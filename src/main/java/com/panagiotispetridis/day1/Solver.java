@@ -25,8 +25,7 @@ public class Solver {
         List<Integer> numbers = new ArrayList<>();
         for (int i = 0; i < line.length(); i++) {
             var curr = this.trie;
-            int j = i;
-            for (; j < line.length(); j++) {
+            for (int j = i; j < line.length(); j++) {
                 char c = line.charAt(j);
                 if (curr.next(c) == null) {
                     break;
@@ -54,8 +53,8 @@ public class Solver {
                 var next = curr.next(c);
                 if (next == null) {
                     next = new TrieNode(c);
+                    curr.add(next);
                 }
-                curr.add(next);
                 curr = next;
             }
             curr.add(new TrieNode(e.getValue()));
