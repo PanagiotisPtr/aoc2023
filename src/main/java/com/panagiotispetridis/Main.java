@@ -5,7 +5,8 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args) {
         if (args.length != 2) {
-            System.out.println("exactly 2 parameters expected: day{1,2..} (eg. day1) and --part{1,2} (eg. --part2)");
+            System.out.println(
+                    "exactly 2 parameters expected: day{1,2..} (eg. day1) and --part{1,2} (eg. --part2)");
             return;
         }
 
@@ -20,8 +21,12 @@ public class Main {
             case "day3":
                 com.panagiotispetridis.day3.App.main(partArgs);
                 break;
+            case "day4":
+                com.panagiotispetridis.day4.App.main(partArgs);
+                break;
             default:
                 System.out.println("invalid day");
         }
     }
 }
+
