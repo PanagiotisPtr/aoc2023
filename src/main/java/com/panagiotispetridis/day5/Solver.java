@@ -1,5 +1,8 @@
 package com.panagiotispetridis.day5;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Solver {
     public Solver() {}
 
@@ -25,18 +28,19 @@ public class Solver {
         for (int i = 0; i < input.seeds().size(); i += 2) {
             long seed = input.seeds().get(i);
             long limit = input.seeds().get(i + 1);
-            for (long j = 0; j < limit; j++) {
-                long tmp = seed + j;
-                for (var map : input.maps()) {
-                    tmp = map.apply(tmp);
-                }
+            List<Range> ranges = new ArrayList<>();
+            ranges.add(new Range(seed, seed, limit));
 
-                if (Long.compareUnsigned(answer, tmp) > 0) {
-                    tmp = seed + j;
-                    for (var map : input.maps()) {
-                        tmp = map.apply(tmp);
-                    }
-                    answer = tmp;
+            for (var map : input.maps()) {
+                List<Range> next = new ArrayList<>();
+                for (var r : ranges) {
+                    next.addAll(map.splitRange(r));
+                }
+                ranges = next;
+            }
+            for (var r : ranges) {
+                if (Long.compareUnsigned(answer, r.start()) > 0) {
+                    answer = r.start();
                 }
             }
         }

@@ -3,7 +3,6 @@ package com.panagiotispetridis.day5;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.TreeSet;
 
 public class Parser {
     public static Input parse(Scanner scanner) {
@@ -23,18 +22,18 @@ public class Parser {
         }
         result = new Input(seeds, new ArrayList<>());
 
-        RangeMap currMap = null;
+        List<Range> mappings = null;
         // remove empty line
         scanner.nextLine();
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             if (line.strip().length() == 0) {
-                result.maps().add(currMap);
+                result.maps().add(new RangeMap(mappings));
                 continue;
             }
 
             if (line.contains("map")) {
-                currMap = new RangeMap(new TreeSet<>());
+                mappings = new ArrayList<>();
                 continue;
             }
 
@@ -47,9 +46,9 @@ public class Parser {
             Long from = Long.parseUnsignedLong(parts[1]);
             Long len = Long.parseUnsignedLong(parts[2]);
 
-            currMap.mappings().add(new Range(dest, from, len));
+            mappings.add(new Range(dest, from, len));
         }
-        result.maps().add(currMap);
+        result.maps().add(new RangeMap(mappings));
 
         return result;
     }
