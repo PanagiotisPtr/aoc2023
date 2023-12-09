@@ -1,8 +1,11 @@
 package com.panagiotispetridis.day8;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import com.panagiotispetridis.day8.CRT.Congruence;
 
 public class Solver {
     public Solver() {}
@@ -54,6 +57,27 @@ public class Solver {
             return Long.valueOf(steps);
         };
 
+        BiFunction<String, Long, String> advance = (node, limit) -> {
+            Long steps = Long.valueOf(0);
+            String curr = node;
+            while (steps < limit) {
+                Long position = steps % input.instructions().size();
+                // this is safe because we mod
+                var instruction = input.instructions().get(position.intValue());
+                switch (instruction) {
+                    case 'L':
+                        curr = input.graph().neighbours(curr).get(0);
+                        break;
+                    default:
+                        curr = input.graph().neighbours(curr).get(1);
+                        break;
+                }
+                steps++;
+            }
+
+            return curr;
+        };
+
         /*
          * For each one of the start points we know that there will be a cycle (otherwise there'd be
          * no solution)
@@ -80,21 +104,60 @@ public class Solver {
          * There's some smart way to find this using the Chinese Remainder Theorem
          * (https://cp-algorithms.com/algebra/chinese-remainder-theorem.html) but I can't come up
          * with it so I'll just brute force this part (there are very few starting points)
+         *
+         * If the moduli/coefficient **are coprime** then the solution can be found from CRT if the
+         * moduli are **not coprime** then the (possible) answer is the LCM of the moduli
          */
-
-        /*
-         * The notes above are wrong but I'll leave them there as I think it's an interesting idea.
-         * * cycles without taking int consideration the instructions. We might go through the same
-         * node but with a different instruction so it's not a proper cycle. Instead I've simplified
-         * it where each full path is a cycle (this is an assumption but seems to work)
-         */
+        List<Congruence> congruences = new ArrayList<>();
         List<Long> pathLengths = new ArrayList<>();
         for (var node : startNodes) {
+            System.out.println("at node: " + node);
             var D = pathLength.apply(node);
+            var targetNodes = input.graph().getTargetNodes(node, input.instructions());
+
+            System.out.println("found target nodes: ");
+            for (var n : targetNodes) {
+                System.out.printf("node: %s\tposition: %d\tperiod: %d\n", n.node(), n.dist(),
+                        n.period());
+                if (n.period() == 0) {
+                    continue;
+                }
+                long remainder = n.dist() == n.period() ? 0 : n.dist();
+                congruences.add(new Congruence(BigInteger.valueOf(remainder),
+                        BigInteger.valueOf(n.period())));
+            }
+            System.out.println();
+
             pathLengths.add(D);
         }
 
-        return new Output(this.lcm(pathLengths));
+        System.out.println("equations: ");
+        int a = 1;
+        for (var e : congruences) {
+            System.out.printf("K = %d + %d * N_%d\n", e.a(), e.m(), a++);
+        }
+        System.out.println();
+
+        long answer = 0;
+        try {
+            System.out.println("trying with CRT");
+            answer = CRT.solve(congruences);
+        } catch (Exception e) {
+            System.out.println("moduli are not coprime, answer is LCM");
+            List<Long> moduli = new ArrayList<>();
+            for (var c : congruences) {
+                moduli.add(c.m().longValue());
+            }
+            answer = this.lcm(moduli);
+        }
+
+        // validate
+        // for (var n : startNodes) {
+        // var end = advance.apply(n, answer);
+        // System.out.printf("node %s ended at %s\n", n, end);
+        // }
+
+        return new Output(answer);
     }
 
     private long lcm(List<Long> numbers) {
