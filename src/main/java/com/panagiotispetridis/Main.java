@@ -39,6 +39,9 @@ public class Main {
             case "day9":
                 com.panagiotispetridis.day9.App.main(partArgs);
                 break;
+            case "day10":
+                com.panagiotispetridis.day10.App.main(partArgs);
+                break;
             default:
                 System.out.println("invalid day");
         }
